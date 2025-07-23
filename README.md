@@ -40,50 +40,29 @@ Built with:
 ```bash
 git clone https://github.com/your-username/ai-task-assistant.git
 cd ai-task-assistant
+
 2. Set up a virtual environment
-bash
-Copy
-Edit
 python -m venv venv
 source venv/bin/activate   # On Windows: venv\Scripts\activate
-3. Install dependencies
-bash
-Copy
-Edit
-pip install -r requirements.txt
-If requirements.txt is missing, run:
 
-bash
-Copy
-Edit
+3. Install dependencies
+
 pip install flask openai
+
 4. Set up environment variables
 Create a .env file or export directly:
-
-bash
-Copy
-Edit
 export OPENAI_API_KEY=your-openai-api-key
-On Windows (CMD):
 
-bash
-Copy
-Edit
+On Windows (CMD):
 set OPENAI_API_KEY=your-openai-api-key
+
 🗃️ Database Setup
 1. Initialize the SQLite database
 Make sure schema.sql exists in the root directory.
 
 Then run:
-
-bash
-Copy
-Edit
 flask --app main.py init-db
 This will create tasks.db and set up the tasks table.
 
 ▶️ Running the App
-bash
-Copy
-Edit
 python main.py
