@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task AI Assistant</title>
+</head>
+<body>
+    <h1>Task List</h1>
+
+    <form action="/add" method="post">
+        <input type="text" name="description" placeholder="Task description" required>
+        <input type="date" name="deadline">
+        <input type="text" name="type" placeholder="Task type (e.g., Work, Personal)">
+        <button type="submit">Add Task</button>
+    </form>
+
+    <h2>Talk to Your Assistant</h2>
+    <form action="/agent" method="post">
+        <input type="text" name="query" placeholder="e.g. add a task to email John tomorrow" required>
+        <button type="submit">Send</button>
+    </form>
+
+    {% if answer %}
+        <p><strong>Assistant:</strong> {{ answer }}</p>
+    {% endif %}
+
+
+    <ul>
+        {% for task in tasks %}
+            <li>
+                <strong>{{ task['description'] }}</strong>
+                {% if task['deadline'] %} (Due: {{ task['deadline'] }}) {% endif %}
+                {% if task['type'] %} [{{ task['type'] }}] {% endif %}
+            </li>
+        {% else %}
+            <li>No tasks yet.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

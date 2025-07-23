@@ -1,0 +1,2 @@
+1. Navigate to the project root directory and install openai library of flask framework
+pip install flask opeai
