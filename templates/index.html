@@ -30,6 +30,7 @@
                 <strong>{{ task['description'] }}</strong>
                 {% if task['deadline'] %} (Due: {{ task['deadline'] }}) {% endif %}
                 {% if task['type'] %} [{{ task['type'] }}] {% endif %}
+                
             </li>
         {% else %}
             <li>No tasks yet.</li>

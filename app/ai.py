@@ -5,6 +5,11 @@ import dateparser
 from datetime import datetime
 from datetime import date
 from flask import current_app
+import numpy as np
+import pickle
+import sqlite3
+from flask import current_app
+from .db import get_db
 
 client = openai.OpenAI()
 
@@ -106,3 +111,31 @@ Respond with JSON only.
             "arguments": {},
             "response": "I'm sorry, I didn't understand that. Please try again."
         }
+    
+def get_embedding(text):
+    client = openai.OpenAI()
+    response = client.embeddings.create(
+        input=text,
+        model="text-embedding-3-small"  # or use another
+    )
+    return response.data[0].embedding
+
+def find_similar_past_tasks(query, top_n=3):
+    query_emb = get_embedding(query)
+    db = get_db()
+
+    rows = db.execute("SELECT id, content, embedding FROM memory").fetchall()
+    scored = []
+
+    for row in rows:
+        emb = pickle.loads(row["embedding"])
+        similarity = cosine_similarity(query_emb, emb)
+        scored.append((similarity, row["content"]))
+
+    # Sort by similarity, high to low
+    scored.sort(reverse=True)
+    return [text for _, text in scored[:top_n]]
+
+def cosine_similarity(a, b):
+    a, b = np.array(a), np.array(b)
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
