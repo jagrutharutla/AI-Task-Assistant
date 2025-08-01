@@ -4,14 +4,58 @@
     <title>Task AI Assistant</title>
 </head>
 <body>
+    {% if summary %}
+    <div>
+        <h3>🧠 Daily Summary</h3>
+        <p>{{ summary }}</p>
+    </div>
+    {% endif %}
+
     <h1>Task List</h1>
 
-    <form action="/add" method="post">
-        <input type="text" name="description" placeholder="Task description" required>
-        <input type="date" name="deadline">
-        <input type="text" name="type" placeholder="Task type (e.g., Work, Personal)">
-        <button type="submit">Add Task</button>
-    </form>
+    <label>
+        <input type="checkbox" id="toggle-completed" checked>
+        Show completed tasks
+    </label>
+    <script>
+        document.getElementById('toggle-completed').addEventListener('change', function() {
+            const rows = document.querySelectorAll('tr');
+            rows.forEach(row => {
+                if (row.innerText.includes("✅ Completed")) {
+                row.style.display = this.checked ? "" : "none";
+                }
+            });
+        });
+    </script>
+    <h2>📋 Task List</h2>
+    <table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+        <tr>
+        <th>Description</th>
+        <th>Deadline</th>
+        <th>Type</th>
+        <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for task in tasks %}
+        <tr {% if task['completed'] %} style="text-decoration: line-through; color: gray;" {% endif %}>
+        <td>{{ task['description'] }}</td>
+        <td>{{ task['deadline'] or "—" }}</td>
+        <td>{{ task['type'] or "—" }}</td>
+        <td>
+            {% if task['completed'] %}
+            ✅ Completed
+            {% else %}
+            ⏳ Pending
+            {% endif %}
+        </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+
+
 
     <h2>Talk to Your Assistant</h2>
     <form action="/agent" method="post">
@@ -24,17 +68,6 @@
     {% endif %}
 
 
-    <ul>
-        {% for task in tasks %}
-            <li>
-                <strong>{{ task['description'] }}</strong>
-                {% if task['deadline'] %} (Due: {{ task['deadline'] }}) {% endif %}
-                {% if task['type'] %} [{{ task['type'] }}] {% endif %}
-                
-            </li>
-        {% else %}
-            <li>No tasks yet.</li>
-        {% endfor %}
-    </ul>
+    
 </body>
 </html>

@@ -3,7 +3,7 @@ import pickle
 import sqlite3
 from .db import get_db
 from .logic import prioritize_tasks
-from .ai import query_assistant_agent, get_embedding, find_similar_past_tasks
+from .ai import query_assistant_agent, get_embedding, find_similar_past_tasks,  generate_daily_summary
 
 main = Blueprint('main', __name__)
 
@@ -13,7 +13,10 @@ def index():
     db = get_db()
     tasks = db.execute('SELECT * FROM tasks ORDER BY deadline').fetchall()
     prioritized = prioritize_tasks(tasks)
-    return render_template('index.html', tasks=prioritized)
+     # Daily summary
+    summary = generate_daily_summary(prioritized)
+    
+    return render_template('index.html', tasks=prioritized, summary=summary)
 
 
 @main.route('/add', methods=['POST'])
@@ -28,7 +31,11 @@ def add_task():
         (description, deadline, task_type)
     )
     db.commit()
-    return redirect(url_for('main.index'))
+    tasks = db.execute('SELECT * FROM tasks ORDER BY deadline').fetchall()
+    prioritized = prioritize_tasks(tasks)
+     # Daily summary
+    summary = generate_daily_summary(prioritized)
+    return render_template('index.html', tasks=prioritized, summary=summary)
 
 
 @main.route('/agent', methods=['POST'])
@@ -36,7 +43,7 @@ def agent():
     user_input = request.form['query']
     db = get_db()
     tasks = db.execute('SELECT * FROM tasks ORDER BY deadline').fetchall()
-
+    
     result = query_assistant_agent(tasks, user_input)
     intent = result.get("intent")
     args = result.get("arguments", {})
@@ -110,7 +117,7 @@ def agent():
             done = stats["completed"] or 0
             pct = (done / total * 100) if total > 0 else 0
             message = f"You've completed {done} out of {total} tasks ({pct:.1f}%)."
-
+        
         elif args.get("description"):
                 matches = find_similar_past_tasks(args["description"])
                 if matches:
@@ -128,4 +135,7 @@ def agent():
 
     updated_tasks = db.execute('SELECT * FROM tasks ORDER BY deadline').fetchall()
     prioritized = prioritize_tasks(updated_tasks)
-    return render_template("index.html", tasks=prioritized, answer=message)
+    summary = generate_daily_summary(prioritized)
+    return render_template("index.html", tasks=prioritized, answer=message,summary=summary)
+
+

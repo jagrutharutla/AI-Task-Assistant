@@ -139,3 +139,32 @@ def find_similar_past_tasks(query, top_n=3):
 def cosine_similarity(a, b):
     a, b = np.array(a), np.array(b)
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+def generate_daily_summary(tasks):
+    today_tasks = [
+        f"{t['description']} (due: {t['deadline']})"
+        for t in tasks
+        if t['deadline'] and t['completed'] == 0
+    ]
+
+    if not today_tasks:
+        return "You have no tasks due today. Enjoy your free time!"
+
+    prompt = f"""
+        You are a helpful agent summarizing today's task list.
+
+        Here are the tasks:
+        {chr(10).join(today_tasks)}
+
+        Generate a 1-2 sentence daily summary: what’s due, anything urgent, and a suggestion for what to start with.
+        """.strip()
+
+    client = openai.OpenAI()
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=100,
+        temperature=0.5,
+    )
+
+    return response.choices[0].message.content.strip()

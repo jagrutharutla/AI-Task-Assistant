@@ -1,26 +1,21 @@
 from datetime import datetime
 
 def prioritize_tasks(tasks):
+    from datetime import datetime
+
     def score(task):
-        # Convert deadline to date object or assign far future if missing
         deadline = task['deadline']
         if deadline:
             try:
-                deadline_date = datetime.strptime(deadline, '%Y-%m-%d')
-            except ValueError:
-                deadline_date = datetime.max
+                due = datetime.strptime(deadline, "%Y-%m-%d")
+                days_left = (due - datetime.now()).days
+                deadline_score = max(0, 30 - days_left)
+            except:
+                deadline_score = 0
         else:
-            deadline_date = datetime.max
+            deadline_score = 0
 
-        # Base score: closer deadline = higher priority
-        days_left = (deadline_date - datetime.now()).days
-        deadline_score = max(0, 30 - days_left)
-
-        # Task type weighting
         type_score = 10 if task['type'] == 'Work' else 0
-
         return deadline_score + type_score
 
-    # Filter out completed tasks
-    incomplete = [t for t in tasks if t['completed'] == 0]
-    return sorted(incomplete, key=score, reverse=True)
+    return sorted(tasks, key=score, reverse=True)
